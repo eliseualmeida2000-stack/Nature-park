@@ -1,72 +1,88 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Nature Park Web</title>
+<title>Nature Park Mobile</title>
 <style>
-body { margin:0; background:#0e2a1f; color:white; font-family:Arial; overflow:hidden; }
-#score { position:absolute; top:10px; left:10px; font-size:20px; }
-canvas { display:block; }
+body {
+  margin:0;
+  background: linear-gradient(#87ceeb, #dff0d8);
+  font-family: Arial;
+  overflow:hidden;
+}
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+.leaf {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  position: absolute;
+}
+.tree {
+  position:absolute;
+  right:0;
+  bottom:0;
+  width:120px;
+  height:300px;
+  background: linear-gradient(brown, green);
+  border-radius: 20px;
+}
+#score {
+  position:absolute;
+  top:10px;
+  left:10px;
+  font-size:20px;
+}
 </style>
 </head>
+
 <body>
-<div id="score">Score: 0</div>
-<canvas id="game"></canvas>
+<div id="game">
+  <div id="score">Pontos: 0</div>
+  <div class="tree"></div>
+</div>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-function resize(){
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener("resize", resize);
-
-const colors = ["#4CAF50","#FFC107","#FF5722","#03A9F4"];
-let leaf = {x: canvas.width/2, y: 0, r: 20, color: randomColor()};
-let speed = 2;
+const game = document.getElementById("game");
+const scoreDiv = document.getElementById("score");
+const colors = ["red","green","yellow","orange"];
 let score = 0;
-let touchX = leaf.x;
+let speed = 2;
+let fallingLeaf = null;
 
-function randomColor(){
-  return colors[Math.floor(Math.random()*colors.length)];
+function createLeaf() {
+  const leaf = document.createElement("div");
+  leaf.className = "leaf";
+  leaf.style.background = colors[Math.floor(Math.random()*4)];
+  leaf.style.left = Math.random() * (window.innerWidth - 150) + "px";
+  leaf.style.top = "-60px";
+  game.appendChild(leaf);
+  fallingLeaf = leaf;
 }
 
-canvas.addEventListener("touchmove", e=>{
-  touchX = e.touches[0].clientX;
-});
+let y = -60;
 
-function update(){
-  leaf.y += speed;
-  leaf.x += (touchX - leaf.x) * 0.2;
+function gameLoop(){
+  if(!fallingLeaf) createLeaf();
+  y += speed;
+  fallingLeaf.style.top = y+"px";
 
-  if(leaf.y > canvas.height){
-    leaf.y = 0;
-    leaf.color = randomColor();
-    score += 10;
-    speed += 0.1;
-    document.getElementById("score").innerText = "Score: " + score;
+  if(y > window.innerHeight-80){
+    score+=10;
+    speed+=0.1;
+    scoreDiv.innerText = "Pontos: "+score;
+    fallingLeaf.remove();
+    fallingLeaf = null;
+    y=-60;
   }
+  requestAnimationFrame(gameLoop);
 }
 
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle = leaf.color;
-  ctx.beginPath();
-  ctx.arc(leaf.x, leaf.y, leaf.r, 0, Math.PI*2);
-  ctx.fill();
-}
-
-function loop(){
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
-
-loop();
+gameLoop();
 </script>
 </body>
 </html>
