@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Nature Park Web</title>
+<style>
+body { margin:0; background:#0e2a1f; color:white; font-family:Arial; overflow:hidden; }
+#score { position:absolute; top:10px; left:10px; font-size:20px; }
+canvas { display:block; }
+</style>
+</head>
+<body>
+<div id="score">Score: 0</div>
+<canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+const colors = ["#4CAF50","#FFC107","#FF5722","#03A9F4"];
+let leaf = {x: canvas.width/2, y: 0, r: 20, color: randomColor()};
+let speed = 2;
+let score = 0;
+let touchX = leaf.x;
+
+function randomColor(){
+  return colors[Math.floor(Math.random()*colors.length)];
+}
+
+canvas.addEventListener("touchmove", e=>{
+  touchX = e.touches[0].clientX;
+});
+
+function update(){
+  leaf.y += speed;
+  leaf.x += (touchX - leaf.x) * 0.2;
+
+  if(leaf.y > canvas.height){
+    leaf.y = 0;
+    leaf.color = randomColor();
+    score += 10;
+    speed += 0.1;
+    document.getElementById("score").innerText = "Score: " + score;
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = leaf.color;
+  ctx.beginPath();
+  ctx.arc(leaf.x, leaf.y, leaf.r, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
